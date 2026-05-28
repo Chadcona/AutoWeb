@@ -9,6 +9,7 @@ npm install
 npm run help
 npm run memory:import
 npm run memory:search -- "cinematic ascii motion"
+npm run run:new -- --target https://example.com --inspiration https://example.org --name example-redesign
 ```
 
 Generated memory and run data are local-only and ignored by Git.
@@ -21,9 +22,10 @@ Implemented:
 - Configured memory source paths.
 - Curated memory importer.
 - Keyword/tag memory search.
+- Target webpage intake analyzer.
+- Optional inspiration URL brief.
 
 Next:
 
-- Target webpage intake.
 - Asset capture.
 - Five static concept outputs.

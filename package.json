@@ -8,6 +8,7 @@
     "help": "node src/cli.mjs help",
     "memory:import": "node src/cli.mjs memory:import",
     "memory:search": "node src/cli.mjs memory:search",
+    "run:new": "node src/cli.mjs run:new",
     "test": "node --test"
   },
   "engines": {
