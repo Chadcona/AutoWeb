@@ -5,6 +5,8 @@
   "type": "module",
   "description": "Curated memory pipeline for high-end website redesign concepts.",
   "scripts": {
+    "dev": "node src/web/server.mjs",
+    "dev:open": "node src/web/server.mjs --open",
     "help": "node src/cli.mjs help",
     "lint": "node scripts/lint.mjs",
     "memory:import": "node src/cli.mjs memory:import",

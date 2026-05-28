@@ -2,3 +2,4 @@
 /memory/
 /runs/
 /node_modules/
+.autoweb-dashboard*.log

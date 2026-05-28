@@ -6,6 +6,7 @@ This project builds a curated memory layer for high-end website redesign work. I
 
 ```powershell
 npm install
+npm run dev
 npm run help
 npm run lint
 npm run memory:import
@@ -19,6 +20,22 @@ npm run run:validate -- <run-id>
 ```
 
 Generated memory and run data are local-only and ignored by Git.
+
+## Browser Dashboard
+
+Run:
+
+```powershell
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:3030
+```
+
+Use the dashboard to import memory, create a run, capture assets, generate five concepts, select two finalists, upgrade finalists, and validate the run. Generated concept and finalist pages can be opened directly from the dashboard.
 
 ## Current Build Status
 
@@ -36,6 +53,7 @@ Implemented:
 - Two-finalist selection.
 - Cinematic finalist upgrade scaffolding.
 - Run validation report.
+- Local browser dashboard.
 
 Next:
 

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AutoWeb Cockpit</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">AutoWeb / memory-indexed site redesign</p>
+        <h1>Build five directions. Upgrade two. Keep the machine honest.</h1>
+      </div>
+      <aside class="status-card">
+        <span>Memory index</span>
+        <strong id="memory-count">...</strong>
+        <small id="memory-date">Checking local index</small>
+      </aside>
+    </section>
+
+    <section class="panel launch-panel">
+      <div>
+        <h2>Start A Run</h2>
+        <p>Enter the site to redesign. Add an inspiration site when you want mood, motion, pacing, or polish direction.</p>
+      </div>
+      <form id="run-form" class="form-grid">
+        <label>
+          Target URL
+          <input name="targetUrl" required placeholder="https://example.com">
+        </label>
+        <label>
+          Inspiration URL
+          <input name="inspirationUrl" placeholder="https://example.org">
+        </label>
+        <label>
+          Run Name
+          <input name="name" placeholder="premium-redesign">
+        </label>
+        <button type="submit">Create Run</button>
+      </form>
+    </section>
+
+    <section class="workspace">
+      <aside class="panel runs-panel">
+        <div class="panel-head">
+          <h2>Runs</h2>
+          <button id="refresh-runs" class="ghost">Refresh</button>
+        </div>
+        <button id="import-memory" class="wide">Import Memory</button>
+        <div id="runs-list" class="runs-list"></div>
+      </aside>
+
+      <section class="panel run-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Current Run</p>
+            <h2 id="current-run-title">No run selected</h2>
+          </div>
+          <a id="target-brief-link" class="ghost-link" href="#" target="_blank" rel="noreferrer">Brief</a>
+        </div>
+
+        <div class="step-grid">
+          <button data-action="assets">Capture Assets</button>
+          <button data-action="concepts">Generate 5 Concepts</button>
+          <button data-action="upgrade">Upgrade Finalists</button>
+          <button data-action="validate">Validate Run</button>
+        </div>
+
+        <section class="concept-section">
+          <div class="panel-head">
+            <h3>Concepts</h3>
+            <button id="select-finalists" class="ghost">Select Two Finalists</button>
+          </div>
+          <div id="concept-grid" class="concept-grid"></div>
+        </section>
+
+        <section class="finalist-section">
+          <h3>Finalists</h3>
+          <div id="finalist-links" class="link-row"></div>
+        </section>
+
+        <section class="log-section">
+          <h3>Run Log</h3>
+          <pre id="log">Ready.</pre>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/app.js" type="module"></script>
+</body>
+</html>
