@@ -7,6 +7,7 @@ This project builds a curated memory layer for high-end website redesign work. I
 ```powershell
 npm install
 npm run help
+npm run lint
 npm run memory:import
 npm run memory:search -- "cinematic ascii motion"
 npm run run:new -- --target https://example.com --inspiration https://example.org --name example-redesign
@@ -24,6 +25,7 @@ Implemented:
 - Keyword/tag memory search.
 - Target webpage intake analyzer.
 - Optional inspiration URL brief.
+- Dependency-free lint pass.
 
 Next:
 
