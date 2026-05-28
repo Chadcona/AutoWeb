@@ -11,6 +11,11 @@ npm run lint
 npm run memory:import
 npm run memory:search -- "cinematic ascii motion"
 npm run run:new -- --target https://example.com --inspiration https://example.org --name example-redesign
+npm run run:assets -- <run-id>
+npm run run:concepts -- <run-id>
+npm run run:select -- <run-id> concept-01 concept-04
+npm run run:upgrade -- <run-id>
+npm run run:validate -- <run-id>
 ```
 
 Generated memory and run data are local-only and ignored by Git.
@@ -26,8 +31,13 @@ Implemented:
 - Target webpage intake analyzer.
 - Optional inspiration URL brief.
 - Dependency-free lint pass.
+- Asset capture.
+- Five static concept outputs and gallery.
+- Two-finalist selection.
+- Cinematic finalist upgrade scaffolding.
+- Run validation report.
 
 Next:
 
-- Asset capture.
-- Five static concept outputs.
+- Browser screenshots and visual QA.
+- More advanced generated design variation.

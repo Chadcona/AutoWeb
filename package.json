@@ -9,7 +9,12 @@
     "lint": "node scripts/lint.mjs",
     "memory:import": "node src/cli.mjs memory:import",
     "memory:search": "node src/cli.mjs memory:search",
+    "run:assets": "node src/cli.mjs run:assets",
+    "run:concepts": "node src/cli.mjs run:concepts",
     "run:new": "node src/cli.mjs run:new",
+    "run:select": "node src/cli.mjs run:select",
+    "run:upgrade": "node src/cli.mjs run:upgrade",
+    "run:validate": "node src/cli.mjs run:validate",
     "test": "node --test"
   },
   "engines": {

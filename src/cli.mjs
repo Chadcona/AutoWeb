@@ -3,7 +3,11 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { importMemory } from "./memory/importer.mjs";
 import { searchMemory } from "./memory/search.mjs";
+import { captureAssets } from "./run/assets.mjs";
+import { generateConcepts } from "./run/concepts.mjs";
+import { selectFinalists, upgradeFinalists } from "./run/finalists.mjs";
 import { createRun } from "./run/intake.mjs";
+import { validateRun } from "./run/validate.mjs";
 
 const rootDir = process.cwd();
 const configPath = path.join(rootDir, "web-builder.config.json");
@@ -13,7 +17,12 @@ const commands = {
   help: showHelp,
   "memory:import": runImport,
   "memory:search": runSearch,
-  "run:new": runNew
+  "run:assets": runAssets,
+  "run:concepts": runConcepts,
+  "run:new": runNew,
+  "run:select": runSelect,
+  "run:upgrade": runUpgrade,
+  "run:validate": runValidate
 };
 
 const command = process.argv[2] ?? "help";
@@ -111,6 +120,59 @@ async function runNew(args) {
   }
 }
 
+async function runAssets(args) {
+  const runId = requireRunId(args, "npm run run:assets -- <run-id>");
+  if (!runId) return;
+
+  const result = await captureAssets({ rootDir, runId });
+  console.log(`Captured ${result.downloaded} assets for ${runId}.`);
+  console.log(`Recorded ${result.total} asset candidates.`);
+  console.log(`Saved ${path.relative(rootDir, result.manifestPath)}.`);
+}
+
+async function runConcepts(args) {
+  const runId = requireRunId(args, "npm run run:concepts -- <run-id>");
+  if (!runId) return;
+
+  const result = await generateConcepts({ rootDir, runId, indexPath });
+  console.log(`Generated ${result.concepts.length} concepts for ${runId}.`);
+  console.log(`Gallery: ${path.relative(rootDir, result.galleryPath)}`);
+}
+
+async function runSelect(args) {
+  const [runId, firstConcept, secondConcept] = args;
+  if (!runId || !firstConcept || !secondConcept) {
+    console.error("Usage: npm run run:select -- <run-id> <concept-a> <concept-b>");
+    process.exitCode = 1;
+    return;
+  }
+
+  const result = await selectFinalists({ rootDir, runId, conceptIds: [firstConcept, secondConcept] });
+  console.log(`Selected finalists for ${runId}: ${result.selected.join(", ")}.`);
+  console.log(`Saved ${path.relative(rootDir, result.selectionPath)}.`);
+}
+
+async function runUpgrade(args) {
+  const runId = requireRunId(args, "npm run run:upgrade -- <run-id>");
+  if (!runId) return;
+
+  const result = await upgradeFinalists({ rootDir, runId, indexPath });
+  console.log(`Upgraded ${result.finalists.length} finalists for ${runId}.`);
+}
+
+async function runValidate(args) {
+  const runId = requireRunId(args, "npm run run:validate -- <run-id>");
+  if (!runId) return;
+
+  const result = await validateRun({ rootDir, runId });
+  console.log(result.passed ? `Run ${runId} passed validation.` : `Run ${runId} needs attention.`);
+  console.log(`Report: ${path.relative(rootDir, result.reportPath)}`);
+
+  if (!result.passed) {
+    process.exitCode = 1;
+  }
+}
+
 function parseOptions(args) {
   const options = {};
 
@@ -133,6 +195,18 @@ function parseOptions(args) {
   return options;
 }
 
+function requireRunId(args, usage) {
+  const runId = args[0];
+
+  if (!runId) {
+    console.error(`Usage: ${usage}`);
+    process.exitCode = 1;
+    return null;
+  }
+
+  return runId;
+}
+
 function showHelp() {
   console.log(`Web Builder Memory Pipeline
 
@@ -145,6 +219,21 @@ Commands:
 
   npm run run:new -- --target <url> [--inspiration <url>] [--name <name>]
     Analyze a target webpage and optional inspiration URL into a run brief.
+
+  npm run run:assets -- <run-id>
+    Download and record reusable target-site assets.
+
+  npm run run:concepts -- <run-id>
+    Generate five static redesign concept slots and a gallery.
+
+  npm run run:select -- <run-id> concept-01 concept-04
+    Select two concepts as finalists.
+
+  npm run run:upgrade -- <run-id>
+    Upgrade selected finalists with cinematic motion and ASCII hooks.
+
+  npm run run:validate -- <run-id>
+    Validate that a run has all required MVP artifacts.
 
   npm test
     Run importer and search tests.

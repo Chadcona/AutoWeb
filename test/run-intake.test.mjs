@@ -4,7 +4,12 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { captureAssets } from "../src/run/assets.mjs";
+import { generateConcepts } from "../src/run/concepts.mjs";
+import { selectFinalists, upgradeFinalists } from "../src/run/finalists.mjs";
 import { analyzeHtml, createRun } from "../src/run/intake.mjs";
+import { writeJson } from "../src/run/files.mjs";
+import { validateRun } from "../src/run/validate.mjs";
 
 test("analyzeHtml extracts structure, CTAs, and asset candidates", () => {
   const analysis = analyzeHtml(
@@ -77,6 +82,58 @@ test("createRun writes target and inspiration briefs separately", async () => {
     assert.match(targetBrief, /Brand mark/);
     assert.match(inspirationBrief, /# Inspiration Site Brief/);
     assert.match(inspirationBrief, /Do not copy its brand/);
+  } finally {
+    server.close();
+    await rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("run pipeline creates assets, concepts, finalists, upgrades, and validation report", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "web-builder-pipeline-"));
+  const server = http.createServer((request, response) => {
+    if (request.url === "/logo.svg") {
+      response.writeHead(200, { "content-type": "image/svg+xml" });
+      response.end(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/></svg>`);
+      return;
+    }
+
+    response.writeHead(200, { "content-type": "text/html" });
+    response.end(`<!doctype html>
+      <title>Pipeline Target</title>
+      <meta name="description" content="A premium local studio">
+      <nav><a href="/work">Work</a><a href="/contact">Contact</a></nav>
+      <h1>Make the room unforgettable</h1>
+      <h2>Proof-led production</h2>
+      <a href="/book">Book now</a>
+      <img src="/logo.svg" alt="Pipeline logo">`);
+  });
+
+  try {
+    const baseUrl = await listen(server);
+    const indexPath = path.join(rootDir, "memory", "index.json");
+    await writeJson(indexPath, {
+      entries: [
+        {
+          title: "Cinematic Site Modules",
+          path: "memory/cinematic.md",
+          sourceLabel: "Memory",
+          sourceType: "obsidian-vault",
+          tags: ["cinematic", "motion", "ascii", "homepage"],
+          summary: "Cinematic motion and ASCII texture for premium site modules."
+        }
+      ]
+    });
+
+    const run = await createRun({ rootDir, targetUrl: baseUrl, name: "Pipeline Test" });
+    await captureAssets({ rootDir, runId: run.runId });
+    const concepts = await generateConcepts({ rootDir, runId: run.runId, indexPath });
+    await selectFinalists({ rootDir, runId: run.runId, conceptIds: ["concept-01", "concept-04"] });
+    await upgradeFinalists({ rootDir, runId: run.runId, indexPath });
+    const validation = await validateRun({ rootDir, runId: run.runId });
+
+    assert.equal(concepts.concepts.length, 5);
+    assert.equal(validation.passed, true);
+    assert.match(await readFile(validation.reportPath, "utf8"), /Status: pass/);
   } finally {
     server.close();
     await rm(rootDir, { recursive: true, force: true });

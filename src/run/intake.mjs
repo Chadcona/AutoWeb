@@ -56,7 +56,9 @@ export async function createRun({ rootDir = process.cwd(), targetUrl, inspiratio
 
   const files = {
     input: path.join(runDir, "input.json"),
+    targetAnalysis: path.join(runDir, "target-analysis.json"),
     targetBrief: path.join(runDir, "target-brief.md"),
+    inspirationAnalysis: null,
     inspirationBrief: null
   };
 
@@ -66,7 +68,9 @@ export async function createRun({ rootDir = process.cwd(), targetUrl, inspiratio
     try {
       const inspiration = await analyzeUrl(normalizedInspirationUrl, { role: "inspiration" });
       input.inspiration = inspiration.metadata;
+      files.inspirationAnalysis = path.join(runDir, "inspiration-analysis.json");
       files.inspirationBrief = path.join(runDir, "inspiration-brief.md");
+      await writeFile(files.inspirationAnalysis, JSON.stringify(serializeAnalysis(inspiration), null, 2) + "\n", "utf8");
       await writeFile(files.inspirationBrief, renderInspirationBrief(inspiration), "utf8");
     } catch (error) {
       inspirationError = error.message;
@@ -77,6 +81,7 @@ export async function createRun({ rootDir = process.cwd(), targetUrl, inspiratio
     }
   }
 
+  await writeFile(files.targetAnalysis, JSON.stringify(serializeAnalysis(target), null, 2) + "\n", "utf8");
   await writeFile(files.targetBrief, targetBrief, "utf8");
   await writeFile(files.input, JSON.stringify(input, null, 2) + "\n", "utf8");
 
@@ -86,6 +91,11 @@ export async function createRun({ rootDir = process.cwd(), targetUrl, inspiratio
     files,
     inspirationError
   };
+}
+
+function serializeAnalysis(analysis) {
+  const { html, ...serializable } = analysis;
+  return serializable;
 }
 
 export async function analyzeUrl(url, { role }) {
