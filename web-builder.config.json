@@ -1,0 +1,44 @@
+{
+  "memorySources": [
+    {
+      "id": "obsidian-test-vault",
+      "label": "Obsidian Test Vault",
+      "path": "C:\\Users\\chadc\\Documents\\Obsidian Vaults\\Test Vault",
+      "type": "obsidian-vault"
+    },
+    {
+      "id": "agent-skills",
+      "label": "Installed Agent Skills",
+      "path": "C:\\Users\\chadc\\.agents\\skills",
+      "type": "skill-library"
+    },
+    {
+      "id": "codex-skills",
+      "label": "Installed Codex Skills",
+      "path": "C:\\Users\\chadc\\.codex\\skills",
+      "type": "skill-library"
+    },
+    {
+      "id": "cona-live-cinematic",
+      "label": "Cona Live Cinematic",
+      "path": "C:\\Users\\chadc\\Documents\\GitHub\\cona-live-cinematic",
+      "type": "design-repo"
+    }
+  ],
+  "excludeDirectories": [
+    ".git",
+    ".superpowers",
+    "node_modules",
+    "dist",
+    "build",
+    "builds",
+    "coverage",
+    ".next",
+    ".vite",
+    ".cache"
+  ],
+  "includeExtensions": [
+    ".md",
+    ".markdown"
+  ]
+}

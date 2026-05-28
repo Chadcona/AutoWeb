@@ -1,0 +1,16 @@
+{
+  "name": "web-builder-memory-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Curated memory pipeline for high-end website redesign concepts.",
+  "scripts": {
+    "help": "node src/cli.mjs help",
+    "memory:import": "node src/cli.mjs memory:import",
+    "memory:search": "node src/cli.mjs memory:search",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

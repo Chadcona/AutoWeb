@@ -1,1 +1,4 @@
-.superpowers/
+/.superpowers/
+/memory/
+/runs/
+/node_modules/
