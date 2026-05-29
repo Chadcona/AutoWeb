@@ -125,6 +125,7 @@ function renderCurrentRun() {
     els.currentRunTitle.textContent = "No run selected";
     els.conceptGrid.innerHTML = "";
     els.finalistLinks.innerHTML = "";
+    updateControlState();
     return;
   }
 
@@ -132,6 +133,7 @@ function renderCurrentRun() {
   els.targetBriefLink.href = run.links.targetBrief;
   renderConcepts(run);
   renderFinalists(run);
+  updateControlState();
   writeLog(`Run loaded: ${run.runId}
 Target: ${run.targetUrl}
 Assets: ${run.assets.downloaded}/${run.assets.total}
@@ -140,6 +142,12 @@ Status: ${JSON.stringify(run.status, null, 2)}`);
 
 function renderConcepts(run) {
   els.conceptGrid.innerHTML = "";
+
+  if (!run.status.concepts) {
+    els.conceptGrid.innerHTML = `<p>Concept files have not been generated yet. Click Generate 5 Concepts when you are ready.</p>`;
+    return;
+  }
+
   const links = [run.links.concept01, run.links.concept02, run.links.concept03, run.links.concept04, run.links.concept05];
 
   links.forEach((link, index) => {
@@ -165,6 +173,7 @@ function renderConcepts(run) {
         state.selectedConcepts.delete(conceptId);
       }
       renderConcepts(run);
+      updateControlState();
     });
     els.conceptGrid.append(card);
   });
@@ -199,6 +208,30 @@ function setBusy(isBusy) {
   document.querySelectorAll("button").forEach((button) => {
     button.disabled = isBusy;
   });
+
+  if (!isBusy) {
+    updateControlState();
+  }
+}
+
+function updateControlState() {
+  const run = state.currentRun;
+
+  document.querySelectorAll("[data-action]").forEach((button) => {
+    const action = button.dataset.action;
+    let enabled = Boolean(run);
+
+    if (action === "assets") enabled = Boolean(run?.status?.targetAnalysis);
+    if (action === "concepts") enabled = Boolean(run?.status?.targetAnalysis);
+    if (action === "upgrade") enabled = Boolean(run?.status?.selection);
+    if (action === "validate") enabled = Boolean(run);
+
+    button.disabled = !enabled;
+  });
+
+  els.selectFinalists.disabled = !run?.status?.concepts || state.selectedConcepts.size !== 2;
+  els.targetBriefLink.style.pointerEvents = run ? "auto" : "none";
+  els.targetBriefLink.style.opacity = run ? "1" : ".45";
 }
 
 async function getJson(url) {
