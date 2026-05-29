@@ -13,6 +13,7 @@ const els = {
   importMemory: document.querySelector("#import-memory"),
   currentRunTitle: document.querySelector("#current-run-title"),
   targetBriefLink: document.querySelector("#target-brief-link"),
+  actionBanner: document.querySelector("#action-banner"),
   conceptGrid: document.querySelector("#concept-grid"),
   selectFinalists: document.querySelector("#select-finalists"),
   upgradeFinalistsSecondary: document.querySelector("#upgrade-finalists-secondary"),
@@ -115,6 +116,12 @@ async function runStep(type) {
     state.currentRun = data.run;
     if (type === "concepts") state.selectedConcepts.clear();
     renderCurrentRun();
+    if (type === "upgrade") {
+      return "Finalists upgraded. Open Finalist A and Finalist B below.";
+    }
+    if (type === "validate") {
+      return "Validation complete. Open the validation report below.";
+    }
     return `${type} complete`;
   });
 }
@@ -204,6 +211,7 @@ function renderConcepts(run) {
 function renderFinalists(run) {
   const links = [];
   if (run.status.finalists) {
+    links.push(`<div class="finalist-ready">Finalists upgraded. Open A and B below.</div>`);
     links.push(`<a href="${run.links.finalistA}" target="_blank" rel="noreferrer">Open Finalist A</a>`);
     links.push(`<a href="${run.links.finalistB}" target="_blank" rel="noreferrer">Open Finalist B</a>`);
   }
@@ -215,15 +223,25 @@ function renderFinalists(run) {
 
 async function action(label, task) {
   writeLog(`${label}...`);
+  showBanner(`${label}...`);
   setBusy(true);
   try {
     const message = await task();
     writeLog(message);
+    showBanner(message);
   } catch (error) {
     writeLog(`Error: ${error.message}`);
+    showBanner(`Error: ${error.message}`, { error: true });
   } finally {
     setBusy(false);
   }
+}
+
+function showBanner(message, { error = false } = {}) {
+  els.actionBanner.hidden = false;
+  els.actionBanner.textContent = `${message} / ${new Date().toLocaleTimeString()}`;
+  els.actionBanner.style.borderColor = error ? "var(--accent)" : "";
+  els.actionBanner.style.background = error ? "#ef6b3c24" : "";
 }
 
 function setBusy(isBusy) {

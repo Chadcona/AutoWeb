@@ -253,6 +253,17 @@ input:focus {
   margin-bottom: 26px;
 }
 
+.action-banner {
+  border: 1px solid color-mix(in srgb, var(--signal) 60%, transparent);
+  background: #78d6a71a;
+  color: var(--ink);
+  padding: 16px;
+  margin-bottom: 22px;
+  font: 700 13px/1.35 "Courier New", monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .concept-section,
 .finalist-section,
 .log-section {
@@ -305,6 +316,14 @@ input:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.finalist-ready {
+  flex-basis: 100%;
+  color: var(--signal);
+  font: 700 12px/1.35 "Courier New", monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 pre {
