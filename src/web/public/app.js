@@ -15,6 +15,7 @@ const els = {
   targetBriefLink: document.querySelector("#target-brief-link"),
   conceptGrid: document.querySelector("#concept-grid"),
   selectFinalists: document.querySelector("#select-finalists"),
+  upgradeFinalistsSecondary: document.querySelector("#upgrade-finalists-secondary"),
   finalistLinks: document.querySelector("#finalist-links"),
   log: document.querySelector("#log")
 };
@@ -67,6 +68,15 @@ document.querySelectorAll("[data-action]").forEach((button) => {
   });
 });
 
+els.upgradeFinalistsSecondary.addEventListener("click", async () => {
+  if (!state.currentRun) {
+    writeLog("Select or create a run first.");
+    return;
+  }
+
+  await runStep("upgrade");
+});
+
 els.selectFinalists.addEventListener("click", async () => {
   if (!state.currentRun) {
     writeLog("Select or create a run first.");
@@ -95,6 +105,18 @@ async function refreshStatus() {
     ? `Updated ${new Date(status.memoryGeneratedAt).toLocaleString()}`
     : "Run Import Memory to build the index";
   renderRuns();
+}
+
+async function runStep(type) {
+  const runId = state.currentRun.runId;
+  const route = `/api/runs/${encodeURIComponent(runId)}/${type}`;
+  await action(`Running ${type}`, async () => {
+    const data = await postJson(route, {});
+    state.currentRun = data.run;
+    if (type === "concepts") state.selectedConcepts.clear();
+    renderCurrentRun();
+    return `${type} complete`;
+  });
 }
 
 function renderRuns() {
@@ -230,6 +252,7 @@ function updateControlState() {
   });
 
   els.selectFinalists.disabled = !run?.status?.concepts || state.selectedConcepts.size !== 2;
+  els.upgradeFinalistsSecondary.disabled = !run?.status?.selection;
   els.targetBriefLink.style.pointerEvents = run ? "auto" : "none";
   els.targetBriefLink.style.opacity = run ? "1" : ".45";
 }
