@@ -58,6 +58,7 @@ export async function upgradeFinalists({ rootDir = process.cwd(), runId, indexPa
     const sourceMetadata = await readJson(path.join(finalistDir, "metadata.json"));
     const metadata = {
       ...sourceMetadata,
+      runId,
       upgradedAt: new Date().toISOString(),
       sourceConcept: finalist.sourceConcept,
       upgradeTechniques: [
@@ -151,7 +152,7 @@ function renderUpgradedHtml({ metadata, target }) {
   </style>
 </head>
 <body>
-  <a class="back" href="/">Back to dashboard</a>
+  <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
   <main>
     <section class="prelude">
       <div>

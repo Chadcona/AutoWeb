@@ -193,6 +193,7 @@ async function describeRun({ rootDir, runId }) {
   const has = (relativePath) => existsSync(path.join(runDir, relativePath));
   const input = has("input.json") ? await readJson(path.join(runDir, "input.json")) : null;
   const assets = has(path.join("assets", "assets.json")) ? await readJson(path.join(runDir, "assets", "assets.json")) : null;
+  const selection = has(path.join("finalists", "selection.json")) ? await readJson(path.join(runDir, "finalists", "selection.json")) : null;
 
   return {
     runId,
@@ -212,6 +213,9 @@ async function describeRun({ rootDir, runId }) {
     assets: {
       total: assets?.total ?? 0,
       downloaded: assets?.downloaded ?? 0
+    },
+    selection: {
+      selected: selection?.selected ?? []
     },
     links: buildRunLinks(runId)
   };

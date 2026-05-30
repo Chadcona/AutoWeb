@@ -22,6 +22,7 @@ const els = {
 };
 
 await refreshStatus();
+await restoreActiveRun();
 
 els.runForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -33,7 +34,8 @@ els.runForm.addEventListener("submit", async (event) => {
       name: form.get("name")
     });
     state.currentRun = data.run;
-    state.selectedConcepts.clear();
+    restoreSelectedConcepts();
+    rememberRun(data.runId);
     await refreshStatus();
     renderCurrentRun();
     return `Created ${data.runId}`;
@@ -114,7 +116,11 @@ async function runStep(type) {
   await action(`Running ${type}`, async () => {
     const data = await postJson(route, {});
     state.currentRun = data.run;
-    if (type === "concepts") state.selectedConcepts.clear();
+    if (type === "concepts") {
+      state.selectedConcepts.clear();
+    } else {
+      restoreSelectedConcepts();
+    }
     renderCurrentRun();
     if (type === "upgrade") {
       return "Finalists upgraded. Open Finalist A and Finalist B below.";
@@ -139,13 +145,46 @@ function renderRuns() {
     button.className = `run-item ${state.currentRun?.runId === run.runId ? "active" : ""}`;
     button.innerHTML = `<strong>${escapeHtml(run.runId)}</strong><small>${escapeHtml(run.targetUrl || "No target URL")}</small>`;
     button.addEventListener("click", async () => {
-      state.currentRun = await getJson(`/api/runs/${encodeURIComponent(run.runId)}`);
-      state.selectedConcepts.clear();
-      renderRuns();
-      renderCurrentRun();
+      await loadRun(run.runId);
     });
     els.runsList.append(button);
   }
+}
+
+async function restoreActiveRun() {
+  const url = new URL(window.location.href);
+  const runId = url.searchParams.get("run") || localStorage.getItem("autoweb.currentRunId");
+
+  if (!runId) return;
+
+  try {
+    await loadRun(runId, { updateUrl: Boolean(url.searchParams.get("run")) });
+  } catch (error) {
+    localStorage.removeItem("autoweb.currentRunId");
+    writeLog(`Could not restore previous run: ${error.message}`);
+  }
+}
+
+async function loadRun(runId, { updateUrl = true } = {}) {
+  state.currentRun = await getJson(`/api/runs/${encodeURIComponent(runId)}`);
+  restoreSelectedConcepts();
+  rememberRun(runId, { updateUrl });
+  renderRuns();
+  renderCurrentRun();
+}
+
+function restoreSelectedConcepts() {
+  state.selectedConcepts = new Set(state.currentRun?.selection?.selected ?? []);
+}
+
+function rememberRun(runId, { updateUrl = true } = {}) {
+  localStorage.setItem("autoweb.currentRunId", runId);
+
+  if (!updateUrl) return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("run", runId);
+  window.history.replaceState(null, "", url);
 }
 
 function renderCurrentRun() {

@@ -77,6 +77,7 @@ export async function generateConcepts({ rootDir = process.cwd(), runId, indexPa
     const conceptDir = path.join(conceptsDir, lane.id);
     const metadata = {
       id: lane.id,
+      runId,
       name: lane.name,
       generatedAt: new Date().toISOString(),
       lane: {
@@ -200,7 +201,7 @@ function renderConceptHtml({ lane, target, inspiration, metadata }) {
   <main>
     <header class="topline">
       <div class="mark">${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}<span>${escapeHtml(target.title)}</span></div>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><a class="back" href="/">Back to dashboard</a><div class="lane">${escapeHtml(lane.name)}</div></div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a><div class="lane">${escapeHtml(lane.name)}</div></div>
     </header>
     <section class="hero">
       <div>
