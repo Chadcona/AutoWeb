@@ -187,7 +187,7 @@ function renderConcepts(run) {
       <iframe src="${link}" title="${conceptId} preview"></iframe>
       <footer>
         <label><input type="checkbox" ${state.selectedConcepts.has(conceptId) ? "checked" : ""}> ${conceptId}</label>
-        <a href="${link}" target="_blank" rel="noreferrer">Open</a>
+        <a href="${link}">Open</a>
       </footer>
     `;
     card.querySelector("input").addEventListener("change", (event) => {
@@ -212,11 +212,11 @@ function renderFinalists(run) {
   const links = [];
   if (run.status.finalists) {
     links.push(`<div class="finalist-ready">Finalists upgraded. Open A and B below.</div>`);
-    links.push(`<a href="${run.links.finalistA}" target="_blank" rel="noreferrer">Open Finalist A</a>`);
-    links.push(`<a href="${run.links.finalistB}" target="_blank" rel="noreferrer">Open Finalist B</a>`);
+    links.push(`<a href="${run.links.finalistA}">Open Finalist A</a>`);
+    links.push(`<a href="${run.links.finalistB}">Open Finalist B</a>`);
   }
   if (run.status.validation) {
-    links.push(`<a href="${run.links.validation}" target="_blank" rel="noreferrer">Validation Report</a>`);
+    links.push(`<a href="${run.links.validation}">Validation Report</a>`);
   }
   els.finalistLinks.innerHTML = links.length > 0 ? links.join("") : "<p>No finalists upgraded yet.</p>";
 }

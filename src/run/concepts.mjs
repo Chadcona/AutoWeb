@@ -175,6 +175,7 @@ function renderConceptHtml({ lane, target, inspiration, metadata }) {
     }
     main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 56px; }
     .topline { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 54px; }
+    .back { color: var(--accent); text-decoration: none; font: 700 12px/1 "Trebuchet MS", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
     .mark { display: inline-flex; align-items: center; gap: 12px; font: 700 14px/1.1 "Trebuchet MS", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
     .mark img { width: 54px; height: 54px; object-fit: contain; border: 1px solid var(--line); border-radius: 50%; padding: 8px; background: var(--panel); }
     .lane { border: 1px solid var(--line); padding: 10px 14px; border-radius: 999px; color: var(--muted); font: 12px/1.1 "Trebuchet MS", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
@@ -199,7 +200,7 @@ function renderConceptHtml({ lane, target, inspiration, metadata }) {
   <main>
     <header class="topline">
       <div class="mark">${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}<span>${escapeHtml(target.title)}</span></div>
-      <div class="lane">${escapeHtml(lane.name)}</div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><a class="back" href="/">Back to dashboard</a><div class="lane">${escapeHtml(lane.name)}</div></div>
     </header>
     <section class="hero">
       <div>

@@ -129,6 +129,7 @@ function renderUpgradedHtml({ metadata, target }) {
     body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .18; background-image: linear-gradient(transparent 95%, var(--signal) 96%), linear-gradient(90deg, transparent 95%, var(--signal) 96%); background-size: 34px 34px; animation: drift 18s linear infinite; }
     main { width: min(1160px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 72px; }
     .prelude { min-height: 100vh; display: grid; align-items: center; grid-template-columns: 1.05fr .95fr; gap: 38px; }
+    .back { position: fixed; top: 18px; left: 18px; z-index: 2; color: var(--signal); text-decoration: none; font: 700 12px/1 "Courier New", monospace; letter-spacing: .14em; text-transform: uppercase; }
     .eyebrow { color: var(--signal); font: 700 12px/1 "Courier New", monospace; letter-spacing: .18em; text-transform: uppercase; }
     h1 { margin: 18px 0; font-size: clamp(54px, 9vw, 132px); line-height: .82; letter-spacing: -.08em; animation: rise .8s cubic-bezier(.22,1,.36,1) both; }
     .deck { color: #dccfbd; font-size: clamp(18px, 2vw, 25px); line-height: 1.38; max-width: 34rem; animation: rise .8s .12s cubic-bezier(.22,1,.36,1) both; }
@@ -150,6 +151,7 @@ function renderUpgradedHtml({ metadata, target }) {
   </style>
 </head>
 <body>
+  <a class="back" href="/">Back to dashboard</a>
   <main>
     <section class="prelude">
       <div>
