@@ -4,6 +4,14 @@ const state = {
   selectedConcepts: new Set()
 };
 
+const CONCEPTS = [
+  { id: "concept-01", name: "Editorial Authority", cue: "Luxury magazine / proof-led" },
+  { id: "concept-02", name: "Cinematic Signal Room", cue: "Atmospheric / stage-light" },
+  { id: "concept-03", name: "Brutalist Operator", cue: "Hard grid / direct CTA" },
+  { id: "concept-04", name: "ASCII Command Theater", cue: "Terminal / high contrast" },
+  { id: "concept-05", name: "Organic Premium Craft", cue: "Tactile / soft asymmetry" }
+];
+
 const els = {
   memoryCount: document.querySelector("#memory-count"),
   memoryDate: document.querySelector("#memory-date"),
@@ -219,13 +227,14 @@ function renderConcepts(run) {
   const links = [run.links.concept01, run.links.concept02, run.links.concept03, run.links.concept04, run.links.concept05];
 
   links.forEach((link, index) => {
-    const conceptId = `concept-${String(index + 1).padStart(2, "0")}`;
+    const concept = CONCEPTS[index];
+    const conceptId = concept.id;
     const card = document.createElement("article");
     card.className = `concept-card ${state.selectedConcepts.has(conceptId) ? "selected" : ""}`;
     card.innerHTML = `
       <iframe src="${link}" title="${conceptId} preview"></iframe>
       <footer>
-        <label><input type="checkbox" ${state.selectedConcepts.has(conceptId) ? "checked" : ""}> ${conceptId}</label>
+        <label><span><input type="checkbox" ${state.selectedConcepts.has(conceptId) ? "checked" : ""}> ${conceptId} / ${escapeHtml(concept.name)}</span><small>${escapeHtml(concept.cue)}</small></label>
         <a href="${link}">Open</a>
       </footer>
     `;

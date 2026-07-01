@@ -142,6 +142,295 @@ ${metadata.assetReuse.length > 0
 }
 
 function renderConceptHtml({ lane, target, inspiration, metadata }) {
+  const renderers = {
+    "concept-01": renderEditorialConcept,
+    "concept-02": renderCinematicConcept,
+    "concept-03": renderBrutalistConcept,
+    "concept-04": renderAsciiConcept,
+    "concept-05": renderCraftConcept
+  };
+  const renderer = renderers[lane.id] ?? renderEditorialConcept;
+  return renderer({ lane, target, inspiration, metadata });
+}
+
+function getConceptContent({ lane, target, metadata }) {
+  const hero = target.headings.find((heading) => heading.level === 1)?.text ?? target.title;
+  const subhead = target.description || target.headings.slice(1, 3).map((heading) => heading.text).join(" ") || lane.tone;
+  const cta = target.ctas[0] ?? target.navigationLinks[0] ?? { text: "Explore", href: target.metadata.url };
+  const source = metadata.assetReuse.find((item) => item.localPath);
+  const assetSrc = source ? `../../${source.localPath.replace(/\\/g, "/")}` : null;
+  const proof = [
+    ...target.headings.slice(0, 5).map((heading) => heading.text),
+    lane.structure,
+    lane.tone,
+    "Built from target content and memory techniques."
+  ];
+
+  return {
+    hero,
+    subhead,
+    cta,
+    assetSrc,
+    proof: [...new Set(proof)].slice(0, 5)
+  };
+}
+
+function renderConceptDocument({ lane, target, css, body }) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(lane.name)} | ${escapeHtml(target.title)}</title>
+  <style>
+${css}
+  </style>
+</head>
+<body>
+${body}
+</body>
+</html>
+`;
+}
+
+function renderConceptContext({ lane, inspiration }) {
+  return `Memory lane: ${escapeHtml(lane.query)}. Inspiration influence: ${escapeHtml(inspiration?.title ?? "none")}. Direction only, never copied.`;
+}
+
+function renderEditorialConcept({ lane, target, inspiration, metadata }) {
+  const { hero, subhead, cta, assetSrc, proof } = getConceptContent({ lane, target, metadata });
+  const css = `    :root { --paper: #f5efe2; --ink: #221913; --soft: #8b806f; --gold: #7d5f3a; --line: #2d211833; --cream: #fffaf0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: radial-gradient(circle at 70% 8%, #d8c59d88, transparent 28rem), var(--paper); font-family: Georgia, "Iowan Old Style", serif; }
+    body::before { content: ""; position: fixed; inset: 18px; border: 1px solid var(--line); pointer-events: none; }
+    main { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: 28px 0 64px; }
+    .top { display: grid; grid-template-columns: .7fr 1.4fr .7fr; gap: 22px; align-items: center; border-bottom: 1px solid var(--line); padding: 48px 0 24px; }
+    .back, .folio { color: var(--gold); text-decoration: none; font: 800 11px/1.4 "Gill Sans", "Trebuchet MS", sans-serif; letter-spacing: .17em; text-transform: uppercase; }
+    .brand { text-align: center; font-size: clamp(28px, 4vw, 58px); line-height: .9; letter-spacing: -.06em; }
+    .brand img { width: 52px; height: 52px; object-fit: contain; display: block; margin: 0 auto 10px; border: 1px solid var(--line); border-radius: 50%; padding: 8px; background: var(--cream); }
+    .hero { min-height: 58vh; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    h1 { margin: 0; font-size: clamp(60px, 10vw, 148px); line-height: .78; letter-spacing: -.09em; max-width: 9ch; }
+    .note { padding: 28px; border-left: 7px solid var(--gold); background: #fff7e7aa; box-shadow: 0 28px 90px #4a33151a; }
+    .deck { color: var(--soft); font-size: clamp(18px, 2vw, 25px); line-height: 1.42; margin: 0 0 22px; }
+    .cta { display: inline-block; color: var(--cream); background: var(--ink); border-radius: 999px; padding: 14px 19px; text-decoration: none; font: 800 12px/1 "Gill Sans", "Trebuchet MS", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+    .ledger { display: grid; grid-template-columns: .62fr 1.38fr; gap: 18px; border-top: 1px solid var(--line); padding-top: 24px; }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .tile { min-height: 150px; padding: 19px; border: 1px solid var(--line); background: #fffaf066; }
+    .tile b { display: block; color: var(--gold); margin-bottom: 14px; font: 800 12px/1 "Gill Sans", sans-serif; letter-spacing: .16em; }
+    .context { margin-top: 24px; color: var(--soft); font-size: 13px; }
+    @media (max-width: 840px) { body::before { inset: 10px; } .top, .hero, .ledger, .tiles { grid-template-columns: 1fr; } .brand { text-align: left; } h1 { max-width: none; } }`;
+  const body = `  <main>
+    <header class="top">
+      <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
+      <div class="brand">${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}${escapeHtml(target.title)}</div>
+      <div class="folio">Concept 01<br>Editorial authority</div>
+    </header>
+    <section class="hero">
+      <h1>${escapeHtml(hero)}</h1>
+      <aside class="note">
+        <p class="deck">${escapeHtml(subhead)}</p>
+        <a class="cta" href="${escapeHtml(cta.href)}">${escapeHtml(cta.text || "Explore")}</a>
+      </aside>
+    </section>
+    <section class="ledger">
+      <div class="folio">Proof ledger</div>
+      <div class="tiles">
+        ${proof.slice(0, 3).map((item, index) => `<article class="tile"><b>0${index + 1}</b>${escapeHtml(item)}</article>`).join("\n        ")}
+      </div>
+    </section>
+    <p class="context">${renderConceptContext({ lane, inspiration })}</p>
+  </main>`;
+
+  return renderConceptDocument({ lane, target, css, body });
+}
+
+function renderCinematicConcept({ lane, target, inspiration, metadata }) {
+  const { hero, subhead, cta, assetSrc, proof } = getConceptContent({ lane, target, metadata });
+  const css = `    :root { --bg: #111719; --ink: #f3eadc; --muted: #c7bba9; --ember: #e6542f; --blue: #8fb7ff; --line: #ffffff24; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: radial-gradient(circle at 52% -6%, #e6542f55, transparent 33rem), radial-gradient(circle at 10% 90%, #8fb7ff24, transparent 26rem), #090b0c; font-family: "Palatino Linotype", Palatino, serif; }
+    main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 66px; }
+    .back { color: var(--blue); text-decoration: none; font: 800 12px/1 "Trebuchet MS", sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+    .screen { min-height: 84vh; display: grid; grid-template-columns: 1.2fr .8fr; gap: 22px; align-items: center; margin-top: 22px; }
+    .stage, .monitor { border: 1px solid var(--line); background: linear-gradient(120deg, #ffffff10, transparent); box-shadow: inset 0 0 80px #e6542f14, 0 36px 110px #0009; }
+    .stage { padding: clamp(28px, 6vw, 74px); position: relative; overflow: hidden; }
+    .stage::after { content: ""; position: absolute; inset: auto -10% -20% 20%; height: 180px; background: radial-gradient(ellipse, #e6542f40, transparent 70%); filter: blur(10px); }
+    .eyebrow { color: var(--ember); font: 800 12px/1 "Trebuchet MS", sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 18px 0; font-size: clamp(58px, 9vw, 136px); line-height: .82; letter-spacing: -.08em; max-width: 9ch; }
+    .deck { max-width: 36rem; color: var(--muted); font-size: clamp(18px, 2vw, 25px); line-height: 1.42; }
+    .cta { display: inline-block; margin-top: 20px; padding: 15px 20px; border: 1px solid var(--ember); color: var(--ink); background: #e6542f26; text-decoration: none; text-transform: uppercase; letter-spacing: .13em; font: 800 12px/1 "Trebuchet MS", sans-serif; }
+    .monitor { min-height: 520px; padding: 20px; display: grid; align-content: space-between; }
+    .monitor img { width: 78px; height: 78px; object-fit: contain; filter: drop-shadow(0 0 24px #e6542f88); }
+    .line { border-top: 1px solid var(--line); padding-top: 14px; color: var(--muted); }
+    .context { color: var(--muted); font-size: 13px; max-width: 80ch; }
+    @media (max-width: 850px) { .screen { grid-template-columns: 1fr; } .monitor { min-height: 320px; } }`;
+  const body = `  <main>
+    <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
+    <section class="screen">
+      <div class="stage">
+        <div class="eyebrow">Concept 02 / Cinematic Signal Room</div>
+        <h1>${escapeHtml(hero)}</h1>
+        <p class="deck">${escapeHtml(subhead)}</p>
+        <a class="cta" href="${escapeHtml(cta.href)}">${escapeHtml(cta.text || "Explore")}</a>
+      </div>
+      <aside class="monitor">
+        ${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : "<span></span>"}
+        <div>
+          ${proof.slice(0, 3).map((item) => `<p class="line">${escapeHtml(item)}</p>`).join("\n          ")}
+        </div>
+      </aside>
+    </section>
+    <p class="context">${renderConceptContext({ lane, inspiration })}</p>
+  </main>`;
+
+  return renderConceptDocument({ lane, target, css, body });
+}
+
+function renderBrutalistConcept({ lane, target, inspiration, metadata }) {
+  const { hero, subhead, cta, assetSrc, proof } = getConceptContent({ lane, target, metadata });
+  const css = `    :root { --bg: #ece7d8; --ink: #171816; --acid: #b6d13b; --muted: #52544b; --line: #171816; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Franklin Gothic Medium", "Arial Narrow", sans-serif; }
+    main { width: min(1200px, calc(100% - 24px)); margin: 0 auto; padding: 18px 0 64px; }
+    .back { display: inline-block; border: 2px solid var(--line); color: var(--ink); padding: 10px 12px; text-decoration: none; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .machine { display: grid; grid-template-columns: .55fr 1.45fr; min-height: 84vh; border: 2px solid var(--line); margin-top: 18px; }
+    .side { border-right: 2px solid var(--line); background: var(--acid); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; }
+    .side img { width: 76px; height: 76px; object-fit: contain; border: 2px solid var(--line); padding: 8px; background: var(--bg); }
+    .label { font-size: 12px; font-weight: 900; letter-spacing: .15em; text-transform: uppercase; }
+    .hero { padding: clamp(24px, 5vw, 64px); display: grid; align-content: space-between; min-height: 62vh; }
+    h1 { margin: 0; max-width: 9ch; font: 900 clamp(60px, 11vw, 154px)/.77 Impact, "Arial Black", sans-serif; text-transform: uppercase; letter-spacing: -.07em; }
+    .deck { max-width: 42rem; color: var(--muted); font-size: clamp(18px, 2vw, 25px); line-height: 1.3; }
+    .cta { display: inline-block; width: fit-content; color: var(--bg); background: var(--ink); text-decoration: none; padding: 16px 18px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; box-shadow: 10px 10px 0 var(--acid); }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid var(--line); }
+    .tile { min-height: 160px; border-right: 2px solid var(--line); padding: 16px; background: #f6f0df; }
+    .tile:last-child { border-right: 0; }
+    .tile b { display: block; margin-bottom: 16px; }
+    .context { padding: 16px; border-top: 2px solid var(--line); font-size: 13px; color: var(--muted); }
+    @media (max-width: 850px) { .machine, .tiles { grid-template-columns: 1fr; } .side { border-right: 0; border-bottom: 2px solid var(--line); min-height: 220px; } .tile { border-right: 0; border-bottom: 2px solid var(--line); } }`;
+  const body = `  <main>
+    <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
+    <section class="machine">
+      <aside class="side">
+        <div>${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}<p class="label">Concept 03<br>${escapeHtml(lane.name)}</p></div>
+        <p class="label">Direct grid. Clear offer. No ornament pretending to be strategy.</p>
+      </aside>
+      <div>
+        <div class="hero">
+          <div>
+            <h1>${escapeHtml(hero)}</h1>
+            <p class="deck">${escapeHtml(subhead)}</p>
+          </div>
+          <a class="cta" href="${escapeHtml(cta.href)}">${escapeHtml(cta.text || "Explore")}</a>
+        </div>
+        <section class="tiles">
+          ${proof.slice(0, 3).map((item, index) => `<article class="tile"><b>0${index + 1}</b>${escapeHtml(item)}</article>`).join("\n          ")}
+        </section>
+        <p class="context">${renderConceptContext({ lane, inspiration })}</p>
+      </div>
+    </section>
+  </main>`;
+
+  return renderConceptDocument({ lane, target, css, body });
+}
+
+function renderAsciiConcept({ lane, target, inspiration, metadata }) {
+  const { hero, subhead, cta, assetSrc, proof } = getConceptContent({ lane, target, metadata });
+  const css = `    :root { --bg: #08100d; --ink: #e8f3e5; --signal: #44c7a1; --hot: #f4773f; --muted: #9fb7a8; --line: #44c7a144; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: radial-gradient(circle at 15% 12%, #1f5a42, transparent 27rem), radial-gradient(circle at 82% 5%, #562515, transparent 25rem), var(--bg); font-family: "Courier New", monospace; }
+    body::before { content: ""; position: fixed; inset: 0; opacity: .16; pointer-events: none; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
+    main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 68px; }
+    .back { color: var(--signal); text-decoration: none; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; }
+    .console { min-height: 88vh; display: grid; grid-template-columns: .82fr 1.18fr; gap: 18px; align-items: stretch; margin-top: 26px; }
+    .rail, .stage, .module { border: 1px solid var(--line); background: #07120ed9; box-shadow: 0 0 0 1px #000, 0 30px 90px #0008; }
+    .rail { padding: 18px; display: flex; flex-direction: column; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--signal); letter-spacing: .15em; text-transform: uppercase; font-size: 12px; }
+    .brand img { width: 58px; height: 58px; object-fit: contain; border: 1px solid var(--line); padding: 8px; background: #e8f3e50d; }
+    pre { margin: 0; color: var(--signal); font: 12px/1.08 "Courier New", monospace; white-space: pre-wrap; }
+    .stage { position: relative; padding: clamp(24px, 4vw, 58px); overflow: hidden; }
+    .stage::before { content: "CONCEPT / ASCII / COMMAND_THEATER"; position: absolute; top: 18px; right: -60px; color: #44c7a155; transform: rotate(34deg); letter-spacing: .23em; font-size: 11px; }
+    .eyebrow { color: var(--hot); letter-spacing: .18em; text-transform: uppercase; font-size: 12px; }
+    h1 { margin: 20px 0 24px; font-size: clamp(48px, 8vw, 116px); line-height: .84; letter-spacing: -.08em; font-family: "Arial Black", Impact, sans-serif; text-transform: uppercase; }
+    .deck { color: var(--muted); font-size: clamp(16px, 2vw, 22px); line-height: 1.45; max-width: 38rem; }
+    .cta { display: inline-block; margin-top: 22px; padding: 16px 18px; color: #07120e; background: var(--signal); text-decoration: none; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; box-shadow: 8px 8px 0 var(--hot); }
+    .stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+    .module { min-height: 170px; padding: 16px; }
+    .module b { display: block; margin-bottom: 12px; color: var(--hot); letter-spacing: .16em; font-size: 12px; }
+    .context { margin-top: 18px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 850px) { .console, .stack { grid-template-columns: 1fr; } h1 { font-family: Impact, sans-serif; } }`;
+  const body = `  <main>
+    <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
+    <section class="console">
+      <aside class="rail">
+        <div class="brand">${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}<span>${escapeHtml(target.title)}</span></div>
+        <pre>+----------------------+
+| CONCEPT 04           |
+| TARGET  : LOCKED     |
+| MEMORY  : ONLINE     |
+| STYLE   : ASCII      |
++----------------------+
+
+MODE COMMAND THEATER
+CHOICE HIGH CONTRAST
+OUTPUT MEMORABLE</pre>
+      </aside>
+      <div class="stage">
+        <div class="eyebrow">${escapeHtml(lane.name)} / concept preview</div>
+        <h1>${escapeHtml(hero)}</h1>
+        <p class="deck">${escapeHtml(subhead)}</p>
+        <a class="cta" href="${escapeHtml(cta.href)}">${escapeHtml(cta.text || "Explore")}</a>
+      </div>
+    </section>
+    <section class="stack">
+      ${proof.slice(0, 3).map((item, index) => `<article class="module"><b>CMD 0${index + 1}</b>${escapeHtml(item)}</article>`).join("\n      ")}
+    </section>
+    <p class="context">${renderConceptContext({ lane, inspiration })}</p>
+  </main>`;
+
+  return renderConceptDocument({ lane, target, css, body });
+}
+
+function renderCraftConcept({ lane, target, inspiration, metadata }) {
+  const { hero, subhead, cta, assetSrc, proof } = getConceptContent({ lane, target, metadata });
+  const css = `    :root { --clay: #f2eadc; --ink: #2b2119; --copper: #bc6f46; --sage: #64765c; --cream: #fff7ea; --line: #2b211924; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: radial-gradient(circle at 18% 15%, #bc6f4640, transparent 25rem), radial-gradient(circle at 84% 20%, #64765c33, transparent 30rem), var(--clay); font-family: Cochin, Georgia, serif; }
+    main { width: min(1160px, calc(100% - 34px)); margin: 0 auto; padding: 28px 0 68px; }
+    .back { color: var(--sage); text-decoration: none; font: 800 12px/1 "Gill Sans", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+    .garden { min-height: 86vh; display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+    .blob { padding: clamp(26px, 5vw, 58px); background: var(--cream); border: 1px solid var(--line); border-radius: 46% 54% 42% 58% / 55% 38% 62% 45%; box-shadow: 0 40px 100px #4b2b161f; }
+    .blob img { width: 72px; height: 72px; object-fit: contain; margin-bottom: 24px; }
+    .eyebrow { color: var(--copper); font: 800 12px/1 "Gill Sans", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { font-size: clamp(54px, 9vw, 128px); line-height: .84; letter-spacing: -.07em; margin: 18px 0; }
+    .deck { color: #584739; font-size: clamp(18px, 2vw, 24px); line-height: 1.45; }
+    .cta { display: inline-block; margin-top: 20px; padding: 15px 20px; color: var(--cream); background: var(--copper); border-radius: 999px; text-decoration: none; text-transform: uppercase; letter-spacing: .12em; font: 800 12px/1 "Gill Sans", sans-serif; }
+    .cards { display: grid; gap: 14px; transform: rotate(-2deg); }
+    .card { min-height: 150px; padding: 22px; background: #fff7ea99; border: 1px solid var(--line); border-radius: 28px; box-shadow: 0 22px 70px #4b2b1617; }
+    .card:nth-child(even) { transform: translateX(28px) rotate(3deg); }
+    .card b { display: block; color: var(--sage); margin-bottom: 12px; font: 800 12px/1 "Gill Sans", sans-serif; letter-spacing: .14em; }
+    .context { color: #665747; font-size: 13px; max-width: 80ch; }
+    @media (max-width: 850px) { .garden { grid-template-columns: 1fr; } .cards, .card:nth-child(even) { transform: none; } }`;
+  const body = `  <main>
+    <a class="back" href="/?run=${encodeURIComponent(metadata.runId)}">Back to dashboard</a>
+    <section class="garden">
+      <div class="blob">
+        ${assetSrc ? `<img src="${escapeHtml(assetSrc)}" alt="">` : ""}
+        <div class="eyebrow">Concept 05 / Organic Premium Craft</div>
+        <h1>${escapeHtml(hero)}</h1>
+        <p class="deck">${escapeHtml(subhead)}</p>
+        <a class="cta" href="${escapeHtml(cta.href)}">${escapeHtml(cta.text || "Explore")}</a>
+      </div>
+      <aside class="cards">
+        ${proof.slice(0, 3).map((item, index) => `<article class="card"><b>Layer 0${index + 1}</b>${escapeHtml(item)}</article>`).join("\n        ")}
+      </aside>
+    </section>
+    <p class="context">${renderConceptContext({ lane, inspiration })}</p>
+  </main>`;
+
+  return renderConceptDocument({ lane, target, css, body });
+}
+
+function renderLegacyConceptHtml({ lane, target, inspiration, metadata }) {
   const hero = target.headings.find((heading) => heading.level === 1)?.text ?? target.title;
   const subhead = target.description || target.headings.slice(1, 3).map((heading) => heading.text).join(" ");
   const cta = target.ctas[0] ?? target.navigationLinks[0] ?? { text: "Explore", href: target.metadata.url };

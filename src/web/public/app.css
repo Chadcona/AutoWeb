@@ -303,6 +303,17 @@ input:focus {
   padding: 12px;
 }
 
+.concept-card label {
+  gap: 5px;
+  line-height: 1.25;
+}
+
+.concept-card label small {
+  color: color-mix(in srgb, var(--muted) 82%, white);
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
 .concept-card a,
 .link-row a {
   color: var(--signal);
